@@ -1023,7 +1023,7 @@ namespace etl
         link_type& last  = *end_.p_value->link_type::etl_previous;
 
         // Unlink from the source list.
-        etl::unlink(first, last);
+        etl::unlink(first, last, false);
 
         // Fix our links.
         link_type& before = *position.p_value->link_type::etl_previous;

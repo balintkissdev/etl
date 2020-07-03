@@ -1,4 +1,9 @@
 ===============================================================================
+18.4.1
+By default, forward and bidirectional intrusive links will clear their links when unlinked.
+A parameter in unlink(), when set to false, will disable link clearing.
+
+===============================================================================
 18.4.0
 Refactored etl::error_handler to use etl::delegate style implementation.
 Allows set_callback() function to be given run-time and compile-time pointers to free and member functions without using etl::ifunction.

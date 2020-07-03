@@ -224,21 +224,51 @@ namespace etl
   // Reference
   template <typename TLink>
   typename etl::enable_if<etl::is_same<TLink, etl::forward_link<TLink::ID> >::value, void>::type
-  unlink_after(TLink& node)
+  unlink_after(TLink& node, bool clear_links = true)
   {
     if (node.etl_next != ETL_NULLPTR)
     {
       TLink* unlinked_node = node.etl_next;
       node.etl_next = unlinked_node->etl_next;
+
+      if (clear_links)
+      {
+        unlinked_node->etl_next = ETL_NULLPTR;
+      }
     }
   }
 
   // Reference, Reference
   template <typename TLink>
   typename etl::enable_if<etl::is_same<TLink, etl::forward_link<TLink::ID> >::value, void>::type
-  unlink_after(TLink& before, TLink& last)
+  unlink_after(TLink& before, TLink& last, bool clear_links = true)
   {
+    if (&before == &last)
+    {
+      return;
+    }
+
+    // Remember the first.
+    TLink* pfirst = before.etl_next;
+
+    // Bypass the unlinked nodes.
     before.etl_next = last.etl_next;
+
+    if (clear_links)
+    {
+      // Terminate.
+      last.etl_next = ETL_NULLPTR;
+
+      // Clear the links in between.
+      TLink* p_current = pfirst;
+
+      while (p_current != ETL_NULLPTR)
+      {
+        TLink* p_next = p_current->etl_next;
+        p_current->etl_next = ETL_NULLPTR;
+        p_current = p_next;
+      }
+    }
   }
 
   //***************************************************************************
@@ -273,19 +303,24 @@ namespace etl
     bidirectional_link* etl_previous;
     bidirectional_link* etl_next;
 
-    void unlink()
+    void unlink(bool clear_links = true)
     {
-        // Connect the previous link with the next.
-        if (etl_previous != ETL_NULLPTR)
-        {
-          etl_previous->etl_next = etl_next;
-        }
+      // Connect the previous link with the next.
+      if (etl_previous != ETL_NULLPTR)
+      {
+        etl_previous->etl_next = etl_next;
+      }
 
-        // Connect the next link with the previous.
-        if (etl_next != ETL_NULLPTR)
-        {
-          etl_next->etl_previous = etl_previous;
-        }
+      // Connect the next link with the previous.
+      if (etl_next != ETL_NULLPTR)
+      {
+        etl_next->etl_previous = etl_previous;
+      }
+
+      if (clear_links)
+      {
+        clear();
+      }
     }
   };
 
@@ -470,15 +505,15 @@ namespace etl
   // Reference
   template <typename TLink>
   typename etl::enable_if<etl::is_same<TLink, etl::bidirectional_link<TLink::ID> >::value, void>::type
-  unlink(TLink& node)
+  unlink(TLink& node, bool clear_links = true)
   {
-    node.unlink();
+    node.unlink(clear_links);
   }
 
   // Reference Reference
   template <typename TLink>
   typename etl::enable_if<etl::is_same<TLink, etl::bidirectional_link<TLink::ID> >::value, void>::type
-  unlink(TLink& first, TLink& last)
+  unlink(TLink& first, TLink& last, bool clear_links = true)
   {
     if (&first == &last)
     {
@@ -494,6 +529,22 @@ namespace etl
       if (first.etl_previous != ETL_NULLPTR)
       {
         first.etl_previous->etl_next = last.etl_next;
+      }
+
+      if (clear_links)
+      {
+        // Terminate.
+        last.etl_next = ETL_NULLPTR;
+
+        // Clear the links in between.
+        TLink* p_current = &first;
+
+        while (p_current != ETL_NULLPTR)
+        {
+          TLink* p_next = p_current->etl_next;
+          p_current->clear();
+          p_current = p_next;
+        }
       }
     }
   }

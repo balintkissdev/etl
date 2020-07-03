@@ -974,7 +974,7 @@ namespace etl
 
         // Unlink from the source list.
         link_type* first_next = first->link_type::etl_next;
-        etl::unlink_after(*first, *last);
+        etl::unlink_after(*first, *last, false);
 
         // Fix our links.
         link_type* before = position.p_value;
